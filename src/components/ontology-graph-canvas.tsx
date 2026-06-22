@@ -127,16 +127,16 @@ export default function OntologyGraphCanvas({
         <input
           id="node-size"
           type="range"
-          min={0.3}
-          max={3}
-          step={0.1}
-          value={sizeScale}
-          onChange={(e) => setSizeScale(Number(e.target.value))}
+          min={1}
+          max={300}
+          step={1}
+          value={Math.round(sizeScale * 100)}
+          onChange={(e) => setSizeScale(Number(e.target.value) / 100)}
           className="h-1 w-28 cursor-pointer accent-sky-400"
           aria-label="노드 크기 조절"
         />
-        <span className="w-8 tabular-nums text-slate-300">
-          {sizeScale.toFixed(1)}x
+        <span className="w-10 tabular-nums text-slate-300">
+          {Math.round(sizeScale * 100)}%
         </span>
       </div>
       <ForceGraph3D
