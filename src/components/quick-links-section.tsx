@@ -226,12 +226,12 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
         detailMode ? "min-h-screen pb-6 pt-3" : "pb-16 pt-6"
       }`}
     >
-      <div className="absolute inset-0 bg-muted/30" />
+      <div className="absolute inset-0 bg-background" />
 
-      <div className="relative mx-auto max-w-7xl">
+      <div className="relative mx-auto max-w-[830px]">
         {!detailMode && (
           <>
-            <div className="mb-4 grid gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="grid gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
               <div>
                 <Badge variant="outline" className="mb-2 bg-background px-2 py-0 text-[11px] text-muted-foreground">
                   Knowledge Dashboard
@@ -261,9 +261,11 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
               </div>
             </div>
 
-            <BannerGrid />
+            <div className="mt-4">
+              <BannerGrid />
+            </div>
 
-            <div className="mb-4">
+            <div className="mt-4">
               <WorkflowSearch
                 query={query}
                 results={searchResults}
@@ -276,7 +278,7 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
         )}
 
         {!activeCategory ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {workflowCategories.map((category) => {
               const chains = chainsForCategory(category);
               const readySections = sectionsWithChains(category);
@@ -289,9 +291,9 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
                   type="button"
                   disabled={!hasChains}
                   onClick={() => openCategory(category)}
-                  className={`group rounded-lg border border-border p-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`group rounded-lg border border-border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     hasChains
-                      ? "bg-card hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md"
+                      ? "bg-card hover:border-foreground/20 hover:bg-muted/40"
                       : "cursor-not-allowed bg-muted/40 text-muted-foreground opacity-75"
                   }`}
                 >
