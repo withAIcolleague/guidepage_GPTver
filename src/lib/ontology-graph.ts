@@ -184,10 +184,10 @@ export const LEVEL_COLORS: Record<OntologyLevel, string> = {
 
 /** 레벨별 노드 크기 */
 export const LEVEL_SIZES: Record<OntologyLevel, number> = {
-  root: 14,
-  category: 9,
-  section: 6,
-  chain: 5,
-  step: 3.5,
-  leaf: 2,
+  root: 4,
+  category: 2.5,
+  section: 1.8,
+  chain: 1.4,
+  step: 1,
+  leaf: 0.6,
 };
