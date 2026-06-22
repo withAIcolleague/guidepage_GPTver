@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Maximize2, Minimize2 } from "lucide-react";
 import ForceGraph3D from "react-force-graph-3d";
 import SpriteText from "three-spritetext";
 import {
@@ -36,6 +37,7 @@ export default function OntologyGraphCanvas({
   );
   const [size, setSize] = useState({ width: 800, height: 560 });
   const [sizeScale, setSizeScale] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -46,6 +48,24 @@ export default function OntologyGraphCanvas({
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
+  }, []);
+
+  // 브라우저 전체화면 상태 동기화 (ESC 등으로 종료될 때 포함)
+  useEffect(() => {
+    const onChange = () =>
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      void el.requestFullscreen();
+    }
   }, []);
 
   const graphData = useMemo(
@@ -73,6 +93,9 @@ export default function OntologyGraphCanvas({
 
   const handleNodeClick = useCallback(
     (node: GraphNode) => {
+      // 클릭한 노드를 항상 화면 중앙으로 가져온다.
+      focusNode(node);
+
       // 최하위(도구/이론) → 미리보기 패널 열기
       if (node.level === "leaf") {
         if (node.url && node.title) {
@@ -92,8 +115,8 @@ export default function OntologyGraphCanvas({
           }
           return next;
         });
-        // 약간의 지연 후 카메라 포커스 (확장된 자식 배치 반영)
-        window.setTimeout(() => focusNode(node), 120);
+        // 확장된 자식 배치가 반영된 뒤 다시 한 번 중앙 정렬
+        window.setTimeout(() => focusNode(node), 250);
       }
     },
     [focusNode, onSelectLeaf],
@@ -138,6 +161,19 @@ export default function OntologyGraphCanvas({
         <span className="w-10 tabular-nums text-slate-300">
           {Math.round(sizeScale * 100)}%
         </span>
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="ml-1 inline-flex items-center justify-center rounded p-1 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label={isFullscreen ? "전체화면 종료" : "전체화면 보기"}
+          title={isFullscreen ? "전체화면 종료" : "전체화면 보기"}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="size-4" />
+          ) : (
+            <Maximize2 className="size-4" />
+          )}
+        </button>
       </div>
       <ForceGraph3D
         ref={fgRef}
