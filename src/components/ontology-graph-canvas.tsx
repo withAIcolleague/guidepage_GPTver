@@ -137,7 +137,7 @@ export default function OntologyGraphCanvas({
     sprite.fontWeight = node.level === "leaf" ? "400" : "600";
     // 라벨을 노드 구체 위쪽에 배치 (구체 반지름 ∝ nodeVal^(1/3))
     const radius = Math.cbrt(LEVEL_SIZES[node.level] * sizeScale) * 4;
-    sprite.position.set(0, radius + 2, 0);
+    (sprite as unknown as { position: { set: (x: number, y: number, z: number) => void } }).position.set(0, radius + 2, 0);
     return sprite;
   }, [sizeScale]);
 
