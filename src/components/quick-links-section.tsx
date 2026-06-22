@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronLeft, Layers } from "lucide-react";
+import { ChevronLeft, Layers, LayoutGrid, Network } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { BannerGrid } from "@/components/banner-grid";
 import { Button } from "@/components/ui/button";
+import { OntologyGraph } from "@/components/ontology-graph";
 import { PreviewPanel } from "@/components/preview-panel";
 import { WorkflowCanvas } from "@/components/workflow-canvas";
 import { WorkflowChainTabs } from "@/components/workflow-chain-tabs";
@@ -79,6 +80,8 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
   const [activeChainId, setActiveChainId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<SelectedWorkflowItem | null>(null);
   const [query, setQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "graph">("grid");
+  const [graphPreview, setGraphPreview] = useState<{ url: string; title: string } | null>(null);
 
   const activeCategory =
     workflowCategories.find((category) => category.id === activeCategoryId) ?? null;
@@ -226,12 +229,12 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
         detailMode ? "min-h-screen pb-6 pt-3" : "pb-16 pt-6"
       }`}
     >
-      <div className="absolute inset-0 bg-muted/30" />
+      <div className="absolute inset-0 bg-background" />
 
-      <div className="relative mx-auto max-w-7xl">
+      <div className="relative mx-auto max-w-[830px]">
         {!detailMode && (
           <>
-            <div className="mb-4 grid gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sm sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="grid gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
               <div>
                 <Badge variant="outline" className="mb-2 bg-background px-2 py-0 text-[11px] text-muted-foreground">
                   Knowledge Dashboard
@@ -261,9 +264,11 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
               </div>
             </div>
 
-            <BannerGrid />
+            <div className="mt-4">
+              <BannerGrid />
+            </div>
 
-            <div className="mb-4">
+            <div className="mt-4">
               <WorkflowSearch
                 query={query}
                 results={searchResults}
@@ -276,7 +281,49 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
         )}
 
         {!activeCategory ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="text-xs font-semibold uppercase text-muted-foreground">
+                {viewMode === "grid" ? "대분류" : "온톨로지 그래프"}
+              </div>
+              <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                    viewMode === "grid"
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-pressed={viewMode === "grid"}
+                >
+                  <LayoutGrid className="size-3.5" />
+                  카드
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("graph")}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                    viewMode === "graph"
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-pressed={viewMode === "graph"}
+                >
+                  <Network className="size-3.5" />
+                  3D 그래프
+                </button>
+              </div>
+            </div>
+
+            {viewMode === "graph" ? (
+              <div className="mt-4">
+                <OntologyGraph
+                  onSelectLeaf={(leaf) => setGraphPreview(leaf)}
+                />
+              </div>
+            ) : (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {workflowCategories.map((category) => {
               const chains = chainsForCategory(category);
               const readySections = sectionsWithChains(category);
@@ -289,9 +336,9 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
                   type="button"
                   disabled={!hasChains}
                   onClick={() => openCategory(category)}
-                  className={`group rounded-lg border border-border p-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  className={`group rounded-lg border border-border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     hasChains
-                      ? "bg-card hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-md"
+                      ? "bg-card hover:border-foreground/20 hover:bg-muted/40"
                       : "cursor-not-allowed bg-muted/40 text-muted-foreground opacity-75"
                   }`}
                 >
@@ -320,7 +367,9 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
                 </button>
               );
             })}
-          </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(420px,50vw)] lg:items-start">
             <div className="min-w-0">
@@ -532,6 +581,16 @@ export function QuickLinksSection({ onDetailModeChange }: QuickLinksSectionProps
           </div>
         )}
       </div>
+
+      {graphPreview && (
+        <PreviewPanel
+          url={graphPreview.url}
+          title={graphPreview.title}
+          isOpen={Boolean(graphPreview)}
+          mode="fixed"
+          onClose={() => setGraphPreview(null)}
+        />
+      )}
     </section>
   );
 }
